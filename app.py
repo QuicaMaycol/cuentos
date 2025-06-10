@@ -6,18 +6,28 @@ import os
 app = Flask(__name__)
 openai.api_key = os.environ.get("OPENAI_API_KEY")
 
-@app.route('/generar-imagen', methods=['POST'])
-def generar_imagen():
+@app.route('/generar-cuento', methods=['POST'])
+def generar_cuento():
     data = request.get_json()
-    prompt = data.get('prompt')
+    nombre = data.get("nombre")
+    edad = data.get("edad")
+    tema = data.get("tema")
 
     try:
-        response = openai.Image.create(
-            prompt=prompt,
-            n=1,
-            size="1024x1024"
+        prompt = f"Escribe un cuento para colorear para un niño de {edad} años llamado {nombre}, sobre el tema: {tema}. Divide el cuento en 3 páginas con texto breve por página."
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[{
+                "role": "user",
+                "content": prompt
+            }]
         )
-        image_url = response['data'][0]['url']
-        return jsonify({"url": image_url})
+        cuento_texto = response.choices[0].message.content
+
+        # Dividir el texto en páginas si es posible
+        paginas = [{"texto": parte.strip()} for parte in cuento_texto.split("\n\n") if parte.strip()]
+
+        return jsonify({"paginas": paginas})
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
