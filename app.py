@@ -18,7 +18,7 @@ def generar_cuento():
     try:
         prompt = f"Escribe un cuento para colorear para un niño de {edad} años llamado {nombre}, sobre el tema: {tema}. Divide el cuento en 3 páginas con texto breve por página."
         response = openai.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4.1-mini",
             messages=[{
                 "role": "user",
                 "content": prompt
