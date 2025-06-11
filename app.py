@@ -48,7 +48,7 @@ def generar_cuento():
 @app.route('/generar-imagen', methods=['POST'])
 def generar_imagen():
     data = request.get_json()
-    descripcion = data.get("texto") or data.get("tema")  # Usa texto por página o tema como fallback
+    descripcion = data.get("descripcion") or data.get("texto") or data.get("tema")  # Usa texto por página o tema como fallback
 
     prompt_imagen = f"Ilustración para colorear estilo libro infantil, blanco y negro, dibujo lineal simple, sobre: {descripcion}"
 
