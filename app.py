@@ -60,6 +60,8 @@ def generar_imagen():
             size="512x512"  # Tamaño más liviano
         )
         image_url = response.data[0].url
+        print("Imagen generada:", image_url)  # <--- AGREGA ESTO
         return jsonify({"url": image_url})
     except Exception as e:
+        print("Error al generar imagen:", e)  # <--- Y ESTO
         return jsonify({"error": str(e)}), 500
