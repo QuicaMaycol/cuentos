@@ -14,10 +14,16 @@ def generar_cuento():
     nombre = data.get("nombre")
     edad = data.get("edad")
     tema = data.get("tema")
-    pagina = data.get("pagina")
+    pagina = data.get("pagina", 2)
 
     try:
-        prompt = f"Escribe un cuento para colorear para un niño de {edad} años llamado {nombre}, sobre el tema: {tema}. Divide el cuento en {pagina} páginas con texto breve por página."
+        prompt = (
+            f"Escribe un cuento para colorear para un niño de {edad} años llamado {nombre}, "
+            f"sobre el tema: {tema}. Divide el cuento en {pagina} páginas. "
+            f"Cada página debe tener un encabezado 'Página X:' seguido de 2 a 3 frases breves y simples. "
+            "El contenido debe ser claro para niños pequeños."
+        )
+
         response = openai.chat.completions.create(
             model="gpt-4.1-mini",
             messages=[{
@@ -25,8 +31,14 @@ def generar_cuento():
                 "content": prompt
             }]
         )
+
         cuento_texto = response.choices[0].message.content
-        paginas = [{"texto": parte.strip()} for parte in cuento_texto.split("\n\n") if parte.strip()]
+
+        # Extraer las páginas usando expresiones regulares
+        matches = re.findall(r"Página\s*\d+:(.*?)(?=Página\s*\d+:|$)", cuento_texto, re.DOTALL)
+
+        paginas = [{"texto": m.strip()} for m in matches][:pagina]  # Limita al número deseado
+
         return jsonify({"paginas": paginas})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
