@@ -44,7 +44,7 @@ def generar_cuento():
                     model="dall-e-3",
                     prompt=prompt_img,
                     n=1,
-                    size="1024x1024"
+                    size="512x512"
                 )
                 img_url = img_response.data[0].url
             except Exception as e:
