@@ -57,7 +57,7 @@ def generar_imagen():
             model="dall-e-3",
             prompt=prompt_imagen,
             n=1,
-            size="512x512"  # Tamaño más liviano
+            size="1024x1024"  # Tamaño más liviano
         )
         image_url = response.data[0].url
         print("Imagen generada:", image_url)  # <--- AGREGA ESTO
