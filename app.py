@@ -11,6 +11,7 @@ openai.api_key = os.environ.get("OPENAI_API_KEY")
 
 @app.route('/generar-cuento', methods=['POST'])
 def generar_cuento():
+    import re
     data = request.get_json()
     nombre = data.get("nombre")
     edad = data.get("edad")
@@ -22,53 +23,41 @@ def generar_cuento():
             f"Escribe un cuento para colorear para un niño de {edad} años llamado {nombre}, "
             f"sobre el tema: {tema}. Divide el cuento en {pagina} páginas. "
             f"Cada página debe tener un encabezado 'Página X:' seguido de 2 a 3 frases breves y simples. "
-            "El contenido debe ser claro para niños pequeños."
+            f"El contenido debe ser claro para niños pequeños."
         )
 
         response = openai.chat.completions.create(
             model="gpt-4.1-mini",
-            messages=[{"role": "user", "content": prompt}]
+            messages=[{
+                "role": "user",
+                "content": prompt
+            }]
         )
 
         cuento_texto = response.choices[0].message.content
 
-        # Extraer texto de cada página
         matches = re.findall(r"Página\s*\d+:(.*?)(?=Página\s*\d+:|$)", cuento_texto, re.DOTALL)
-        paginas = []
 
-        for i, texto in enumerate(matches[:pagina]):
-            texto = texto.strip()
-            prompt_img = f"Dibujo para colorear, estilo libro infantil, en blanco y negro, sobre: {texto}. Sin color. Dibujo lineal simple."
-            try:
-                img_response = openai.images.generate(
-                    model="dall-e-3",
-                    prompt=prompt_img,
-                    n=1,
-                    size="512x512"
-                )
-                img_url = img_response.data[0].url
-            except Exception as e:
-                img_url = None  # en caso de fallo
-
-            paginas.append({"texto": texto, "imagen": img_url})
+        paginas = [{"texto": m.strip()} for m in matches][:pagina]
 
         return jsonify({"paginas": paginas})
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 @app.route('/generar-imagen', methods=['POST'])
 def generar_imagen():
     data = request.get_json()
-    tema = data.get("tema")
+    descripcion = data.get("texto") or data.get("tema")  # Usa texto por página o tema como fallback
 
-    prompt_imagen = f"ilustración en blanco y negro estilo libro para colorear para niños, sobre {tema}, sin color, dibujo lineal simple"
+    prompt_imagen = f"Ilustración para colorear estilo libro infantil, blanco y negro, dibujo lineal simple, sobre: {descripcion}"
 
     try:
         response = openai.images.generate(
             model="dall-e-3",
             prompt=prompt_imagen,
             n=1,
-            size="1024x1024"
+            size="512x512"  # Tamaño más liviano
         )
         image_url = response.data[0].url
         return jsonify({"url": image_url})
