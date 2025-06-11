@@ -14,9 +14,10 @@ def generar_cuento():
     nombre = data.get("nombre")
     edad = data.get("edad")
     tema = data.get("tema")
+    pagina = data.get("pagina")
 
     try:
-        prompt = f"Escribe un cuento para colorear para un niño de {edad} años llamado {nombre}, sobre el tema: {tema}. Divide el cuento en 3 páginas con texto breve por página."
+        prompt = f"Escribe un cuento para colorear para un niño de {edad} años llamado {nombre}, sobre el tema: {tema}. Divide el cuento en {pagina} páginas con texto breve por página."
         response = openai.chat.completions.create(
             model="gpt-4.1-mini",
             messages=[{
